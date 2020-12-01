@@ -51,8 +51,8 @@ The following instructions, generally speaking, walk through installation of Dot
 >      [Install]
 >      WantedBy=multi-user.target
       
->  sudo systemctl enable heralding-frontend
->  sudo systemctl start heralding-frontend
+>      sudo systemctl enable heralding-frontend
+>      sudo systemctl start heralding-frontend
    
 5. This application uses MySQL 8.0.21 as a backend to store Heralding logs. An easy tutorial to follow for installing is here: https://www.digitalocean.com/community/tutorials/how-to-install-mysql-on-ubuntu-20-04
 
@@ -72,8 +72,8 @@ The following instructions, generally speaking, walk through installation of Dot
 6. 2 jobs should be configured to run the two scripts to both move data in to sql and also move exported MySQL data to the public website. The following example runs those processes every 5 minutes but they can be changed as necessary.
 
 >   sudo crontab -e:
->    */5 * * * * sh {heralding install directory}/frontend-services/mv_to_mysql.sh >> /var/log/heralding-mysql.log
->    */5 * * * * sh {heralding install directory}/frontend-services/update.sh >> /var/log/heralding-update.log
+>      */5 * * * * sh {heralding install directory}/frontend-services/mv_to_mysql.sh >> /var/log/heralding-mysql.log
+>      */5 * * * * sh {heralding install directory}/frontend-services/update.sh >> /var/log/heralding-update.log
     
    **Note: mv_to_mysql.sh uses the encrypted login-path called "mypath" instead of hard coding the login information: https://dev.mysql.com/doc/refman/5.6/en/option-file-options.html**
    **Important Note: Each script is configured using variables at the top of each script indicating where the directory Heralding is installed. It must be changed to match your configuration.**
@@ -83,10 +83,16 @@ The following instructions, generally speaking, walk through installation of Dot
 8. Optionally, create scheduled tasks in MySQL to export data as needed so the heralding-update service (in step 5) cam move the files out to the public folder. If workbench is installed, just copy and paste the following and execute:
 
 > CREATE EVENT make_30_day_blacklist ON SCHEDULE EVERY 5 MINUTE STARTS CURRENT_TIMESTAMP DO Select distinct source_ip from sessions left join whitelist on source_ip = ip_addr where ip_addr is null and timestamp between subdate(curdate(), 30)and curdate()  INTO OUTFILE '/var/lib/mysql-files/30-day-blacklist.txt' LINES TERMINATED BY '\r\n';
+
 > CREATE EVENT make_14_day_blacklist ON SCHEDULE EVERY 5 MINUTE STARTS CURRENT_TIMESTAMP DO Select distinct source_ip from sessions left join whitelist on source_ip = ip_addr where ip_addr is null and timestamp between subdate(curdate(), 14)and curdate()  INTO OUTFILE '/var/lib/mysql-files/14-day-blacklist.txt' LINES TERMINATED BY '\r\n';
+
 > CREATE EVENT make_blacklist ON SCHEDULE EVERY 5 MINUTE STARTS CURRENT_TIMESTAMP DO select distinct source_IP from sessions left join whitelist on source_ip = ip_addr where ip_addr is null INTO OUTFILE '/var/lib/mysql-files/blacklist.txt' LINES TERMINATED BY '\r\n';
+
 > CREATE EVENT make_whitelist ON SCHEDULE EVERY 5 MINUTE STARTS CURRENT_TIMESTAMP DO Select distinct ip_addr from whitelist INTO OUTFILE '/var/lib/mysql-files/whitelist.txt' LINES TERMINATED BY '\r\n';
+
 > CREATE EVENT make_password_list ON SCHEDULE EVERY 5 MINUTE STARTS CURRENT_TIMESTAMP DO Select distinct password from authentications order by password INTO OUTFILE '/var/lib/mysql-files/passwordlist.txt' LINES TERMINATED BY '\r\n';
+
 > CREATE EVENT make_username_list ON SCHEDULE EVERY 5 MINUTE STARTS CURRENT_TIMESTAMP DO Select distinct username from authentications order by username INTO OUTFILE '/var/lib/mysql-files/usernamelist.txt' LINES TERMINATED BY '\r\n';
+
 > CREATE EVENT make_14_day_username_list ON SCHEDULE EVERY 5 MINUTE STARTS CURRENT_TIMESTAMP DO Select distinct username from authentications where timestamp between subdate(curdate(), 14) and curdate() order by username INTO OUTFILE '/var/lib/mysql-files/14-day-username-list.txt' LINES TERMINATED BY '\r\n';
     
