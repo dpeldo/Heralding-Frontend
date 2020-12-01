@@ -100,3 +100,5 @@ The following instructions, generally speaking, walk through installation of ASP
 
 > CREATE EVENT make_14_day_username_list ON SCHEDULE EVERY 5 MINUTE STARTS CURRENT_TIMESTAMP DO Select distinct username from authentications where timestamp between subdate(curdate(), 14) and curdate() order by username INTO OUTFILE '/var/lib/mysql-files/14-day-username-list.txt' LINES TERMINATED BY '\r\n';
     
+
+At this point, after the server has been running for 5 minutes, you should have new blacklists available at http://127.0.0.1:8181/Public/blacklist.txt. Be sure to add IP addresses to your whitelist if your firewall is configured to block ip addresses in the new blacklist file.
