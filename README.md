@@ -23,15 +23,15 @@ The following instructions, generally speaking, walk through installation of Dot
 4. Install and configure Apache2 reverse proxy: https://www.c-sharpcorner.com/article/how-to-deploy-net-core-application-on-linux/
   **Note: The port apache listens on cannot be one already in use or monitored by heralding. Make sure to change the listening port and add a .conf file to your conf-enabled folder. In the following example, Apache is configured to listen on port 8181 and forward traffic to the internal Kestrel server that DotNet uses.**
 
->   /etc/apache2/conf-enabled/heralding-frontend.conf:
->      <VirtualHost *:8181>  
->       ProxyPreserveHost On
->       ProxyPass / http://127.0.0.1:5000/
->       ProxyPassReverse / http://127.0.0.1:5000/
->       ErrorLog ${APACHE_LOG_DIR}/heralding-frontend-error.log  
->       CustomLog ${APACHE_LOG_DIR}/heralding-frontend-access.log combined  
->      </VirtualHost>
-      
+'<   /etc/apache2/conf-enabled/heralding-frontend.conf:
+      <VirtualHost *:8181>  
+       ProxyPreserveHost On
+       ProxyPass / http://127.0.0.1:5000/
+       ProxyPassReverse / http://127.0.0.1:5000/
+       ErrorLog ${APACHE_LOG_DIR}/heralding-frontend-error.log  
+       CustomLog ${APACHE_LOG_DIR}/heralding-frontend-access.log combined  
+      </VirtualHost>
+>'      
 >   /etc/pache2/ports.conf:
 >      ...
 >      Listen 8181
