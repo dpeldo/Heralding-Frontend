@@ -1,0 +1,2 @@
+# Heralding-Frontend
+Heralding-Frontend is a Dotnet Core web frontend for the Heralding honeypot project. The intent of this application is to move the honeypot connection event data to a database to process the data more thoroughly. Using MySQL as a backend data storage platform, new features become available like creating blacklists, password lists, or generate username lists to compare against your AD users.
