@@ -75,6 +75,7 @@ The following instructions, generally speaking, walk through installation of ASP
 
 >   sudo crontab -e:
 >      */5 * * * * sh {heralding install directory}/frontend-services/mv_to_mysql.sh >> /var/log/heralding-mysql.log
+
 >      */5 * * * * sh {heralding install directory}/frontend-services/update.sh >> /var/log/heralding-update.log
     
    **Note: mv_to_mysql.sh uses the encrypted login-path called "mypath" instead of hard coding the login information: https://dev.mysql.com/doc/refman/5.6/en/option-file-options.html**
