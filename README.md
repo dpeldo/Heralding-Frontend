@@ -74,6 +74,7 @@ The following instructions, generally speaking, walk through installation of ASP
 6. 2 jobs should be configured to run the two scripts to both move data in to sql and also move exported MySQL data to the public website. The following example runs those processes every 5 minutes but they can be changed as necessary.
 
 >   sudo crontab -e:
+
 >      */5 * * * * sh {heralding install directory}/frontend-services/mv_to_mysql.sh >> /var/log/heralding-mysql.log
 
 >      */5 * * * * sh {heralding install directory}/frontend-services/update.sh >> /var/log/heralding-update.log
