@@ -14,7 +14,8 @@ The honeypot & frontend seem to run perfectly well on a guest vm with 2gb of ram
 The following instructions, generally speaking, walk through installation of ASP.Net Core, MySQL, configuring services, and scheduled jobs in 7 or 8 easy steps. In addition to creating the service for the frontend, it works best if Heralding itself also starts as a service. 
 
 1. This application assumes Heralding is already installed and collecting logs into the session & auth .csv's. If not, please visit: https://github.com/johnnykv/heralding/blob/master/INSTALL.md
-  **Note: Don't forget to configure the firewall (use what ever firewall you are confortable with) for any ports you want to monitor. In addition, you'll need to open a port for internal private access to the website, like 8181 in the example below. Do not open this port to the outside world!!!!**
+
+**Note: Don't forget to configure the firewall (use what ever firewall you are confortable with) for any ports you want to monitor. In addition, you'll need to open a port for internal private access to the website, like 8181 in the example below. Do not open this port to the outside world!!!!**
   
 2. At this point you can move the application in to {Heralding install directory}/frontend and the .sh scripts to {heralding install directory}/frontend-services/.**
      
@@ -23,7 +24,8 @@ The following instructions, generally speaking, walk through installation of ASP
    -Test to make sure the honeypot is available at http://127.0.0.1:5000 before moving on.
    
 4. Install and configure Apache2 reverse proxy: https://www.c-sharpcorner.com/article/how-to-deploy-net-core-application-on-linux/
-  **Note: The port apache listens on cannot be one already in use or monitored by heralding. Make sure to change the listening port and add a .conf file to your conf-enabled folder. In the following example, Apache is configured to listen on port 8181 and forward traffic to the internal Kestrel server that dotnet uses.**
+
+**Note: The port apache listens on cannot be one already in use or monitored by heralding. Make sure to change the listening port and add a .conf file to your conf-enabled folder. In the following example, Apache is configured to listen on port 8181 and forward traffic to the internal Kestrel server that dotnet uses.**
 
    /etc/apache2/conf-enabled/heralding-frontend.conf:
  >     <VirtualHost *:8181>  
