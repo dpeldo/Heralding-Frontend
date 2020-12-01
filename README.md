@@ -1,15 +1,16 @@
 # Heralding-Frontend
-Disclaimer: A certain amount of knowlege and technical expertise is expected in networking, linux, and mysql, and as such support in those areas on my part will be limited. The project goal is to get the Frontend out to the public to try out. The instructions below include example configurations and should be used at your own risk.
+###Disclaimer: 
+A certain amount of knowlege and technical expertise is expected in networking, linux, and mysql, and as such support in those areas on my part will be limited. The project goal is to get the Frontend out to the public to try out. The instructions below include example configurations and should be used at your own risk.
 
-About Heralding-Frontend:
+###About Heralding-Frontend:
 For a very long time now, I had this desire to set up a honeypot and use it to create a blacklist that my firewall could use to block potential attackers. After digging around a bit I found Heralding, and then later a very useful tutorial by Dennis Puerto that got me going in the right direction. After initially building a completely text based version of the gui (loosely based on Dennis's project here: https://www.linkedin.com/pulse/honeypot-generating-blacklists-cisco-firepower-dennis-perto/), I figured I could take it up a notch by creating something that scales much better with larger datasets that could be used for years at a time. 
 
 Heralding-Frontend is a database driven self contained Dotnet Core web frontend for a stock install of the Heralding honeypot. The intent of this application is to provide a free searchable GUI for reporting Heralding traffic by moving the honeypot connection data to a database for processing. Using MySQL as a free backend data storage platform, new features become available like creating blacklists for firewall ingestion, password lists, or generate username lists to compare against your AD users. 
 
-Environment:
+###Environment:
 The honeypot & frontend seem to run perfectly well on a guest vm with 2gb of ram with 2 processors and 20Gb of storage space all on an optiplex 7010 (host: Windows 10 20h2 i7 3.4ghz, 8gb ram, 250gb ssd from 2014) running Ubuntu 20.04 fully patched. The honeypot also has a single NIC with multiple public IP's which provides for a larger attack surface with more flexibility. While the system is quite responsive, you may need to add more ram depending on your setup and so I recommend 4gb with 4 processors and an ssd. In the following setup instructions, the frontend application resides in the Heralding directory in a folder called "frontend" for simplicity. On my dev lab, I have Heralding installed to the users home directory, but can be physically exist anywhere as long as the scheduled tasks, services, and scripts all point to the right location. 
 
-Installing Heralding-Frontend:
+###Installing Heralding-Frontend:
 The following instructions, generally speaking, walk through installation of Dotnet Core, MySQL, configuring services, and scheduled jobs in 7 or 8 easy steps. In addition to creating the service for the frontend, it works best if Heralding itself also starts as a service. 
 
 1. This application assumes Heralding is already installed and collecting logs into the session & auth .csv's. If not, please visit: https://github.com/johnnykv/heralding/blob/master/INSTALL.md
