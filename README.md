@@ -1,9 +1,9 @@
 # Heralding-Frontend
 ### Disclaimer: 
-A certain amount of knowledge and technical expertise is expected in networking, linux, and mysql. As such support in those areas on my part will be limited. The project goal is to get the Frontend out to the public to try out. The instructions below include example configurations and should be used at your own risk.
+Heralding-Frontend is not affiliated with the Heralding Honeypot project created by johnnykv. It's only an application that works with logs created by his application. A certain amount of knowledge and technical expertise is expected in networking, linux, and mysql. As such support in those areas on my part will be limited. The instructions below include example configurations and should be used at your own risk.
 
 ### About Heralding-Frontend:
-For a very long time now, I had this desire to set up a honeypot and use it to create a blacklist that my firewall could use to block attackers and generate lists of usernames and passwords used to log in. After digging around a bit I found a fantastic tool called Heralding that seemed to check the most boxes for me. The article I came across was a walk-through by Dennis Puerto (https://www.linkedin.com/pulse/honeypot-generating-blacklists-cisco-firepower-dennis-perto/). After initially building a completely text based version of the gui loosely based on Dennis's project, I figured I could take it up a notch by creating something that scales much better with larger datasets that could be used for years at a time. 
+For a very long time now, I've had this desire to set up a honeypot and use it to create a blacklist that my firewall could use to block attackers and generate lists of usernames and passwords used to log in. After digging around a bit I found a fantastic tool called Heralding that seemed to check the most boxes for me. The article I came across was a walk-through by Dennis Puerto (https://www.linkedin.com/pulse/honeypot-generating-blacklists-cisco-firepower-dennis-perto/). After initially building a completely text based version of the gui loosely based on Dennis's idea, I figured I could take it up a notch by creating something that scales much better with larger datasets that could be used for years at a time. 
 
 Heralding-Frontend is a database driven self contained ASP.Net Core web frontend for a stock install of the Heralding honeypot. The intent of this application is to provide a free searchable GUI for reporting Heralding traffic by moving the honeypot connection data to a database for processing. By using MySQL as a free backend data storage platform, it's now possible to create blacklists for firewall ingestion, password lists, or generate username lists to compare against AD users. 
 
@@ -13,7 +13,7 @@ The honeypot & frontend seem to run perfectly well on a guest vm with 2gb of ram
 In the following setup instructions, the frontend application resides in the Heralding directory in a folder called "frontend" for simplicity while scripts reside in a folder called "frontend-services". On my dev lab, I have Heralding installed to the users' home directory, but can be physically exist anywhere as long as the scheduled jobs, services, and scripts are modified to point to the right location. 
 
 ### Installing Heralding-Frontend:
-The following instructions, generally speaking, walk through the order of installation of ASP.Net Core, MySQL, configuring services, as well as adding the scheduled jobs. All in 7 (or 8) easy steps!!!
+The following instructions, generally speaking, walk through the order of installation of ASP.Net Core, MySQL, configuring services, as well as adding the scheduled jobs. All in 7 (or 8) easy steps. If you feel you can install and configure SQL, Apache, and ASP.Net or already have them installed then steps 2 and 6/7/8 are the only relevant steps.
 
 **1.** This application assumes Heralding is already installed and collecting logs into the session & auth .csv's. If not, please visit: https://github.com/johnnykv/heralding/blob/master/INSTALL.md
 
@@ -88,7 +88,7 @@ Before moving on to step 6, you'll need to add permissions to the user you creat
 
 >     GRANT FILE ON heralding.* TO 'heralding'@'localhost';
 
-or, if you prefer: 
+or, if you know what the following does, you know why you might want to use it instead: 
 
 >     GRANT FILE ON heralding.* TO 'heralding'@'%';
 
@@ -135,3 +135,4 @@ If everything is working as designed, go ahead and schedule a time for the scrip
     
 
 At this point, after the server has been running for 5 minutes, you should have new blacklists available at http://127.0.0.1:8181/Public/blacklist.txt. Be sure to add IP addresses to your whitelist if your edge firewall is configured to block ip addresses with the new blacklist files. If your edge firewall is using the new blacklist, anyone that tries to establish a connection on an open port (other than 8181) will be added to this new blacklist text file after no more than 5 minutes.
+
