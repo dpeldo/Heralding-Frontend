@@ -17,7 +17,7 @@ The following instructions, generally speaking, walk through the order of instal
 
 **1.** This application assumes Heralding is already installed and collecting logs into the session & auth .csv's. If not, please visit: https://github.com/johnnykv/heralding/blob/master/INSTALL.md
 
-**Note: Don't forget to configure the firewall (use what ever firewall you are comfortable with) for any ports you want to monitor. In addition, you'll need to open a port for internal private access to the website, like 8181 in the example below. Do not open this port to the outside world!!!!**
+**Note: Don't forget to configure the local firewall (use what ever firewall you are comfortable with) for any ports you want to monitor. In addition, you'll need to open a port for internal private access to the website, like 8181 in the example below. Do not open this port to the outside world!!!!**
   
 **2.** At this point you can move the application in to {Heralding install directory}/frontend and the .sh scripts to {heralding install directory}/frontend-services/
      
@@ -134,4 +134,4 @@ If everything is working as designed, go ahead and schedule a time for the scrip
 > CREATE EVENT make_14_day_username_list ON SCHEDULE EVERY 30 MINUTE STARTS CURRENT_TIMESTAMP DO Select distinct username from authentications where timestamp between subdate(curdate(), 14) and curdate() order by username INTO OUTFILE '/var/lib/mysql-files/14-day-username-list.txt' LINES TERMINATED BY '\r\n';
     
 
-At this point, after the server has been running for 5 minutes, you should have new blacklists available at http://127.0.0.1:8181/Public/blacklist.txt. Be sure to add IP addresses to your whitelist if your edge firewall is configured to block ip addresses with the new blacklist file. If your edge firewall is using the new blacklist, anyone that tries to establish a connection on an open port (other than 8181) will be added to this new blacklist text file after no more than 5 minutes.
+At this point, after the server has been running for 5 minutes, you should have new blacklists available at http://127.0.0.1:8181/Public/blacklist.txt. Be sure to add IP addresses to your whitelist if your edge firewall is configured to block ip addresses with the new blacklist files. If your edge firewall is using the new blacklist, anyone that tries to establish a connection on an open port (other than 8181) will be added to this new blacklist text file after no more than 5 minutes.
