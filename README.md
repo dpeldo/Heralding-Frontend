@@ -66,7 +66,7 @@ The following instructions, generally speaking, walk through the order of instal
   **Note: Please remember to change the MySQL port if Heralding is configured to monitor for MySQL logins on port 3307. 
           In the following example, MySQL is configured to use port 3307.**
           
-   mysqld.cnf:
+   /etc/mysql/mysql.conf.d/mysqld.cnf:
 >      [mysqld]
 >      ...
 >      port		= 3307  # (or anything you want that isn't already in use or being monitored)
