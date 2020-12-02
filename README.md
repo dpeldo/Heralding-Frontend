@@ -3,21 +3,21 @@
 A certain amount of knowledge and technical expertise is expected in networking, linux, and mysql. As such support in those areas on my part will be limited. The project goal is to get the Frontend out to the public to try out. The instructions below include example configurations and should be used at your own risk.
 
 ### About Heralding-Frontend:
-For a very long time now, I had this desire to set up a honeypot and use it to create a blacklist that my firewall could use to block attackers and generate lists of usernames and passwords used to log in. After digging around a bit I found a fantastic tool called Heralding that seemed to check the most boxes for me. The article I came accross was a walk-through by Dennis Puerto (https://www.linkedin.com/pulse/honeypot-generating-blacklists-cisco-firepower-dennis-perto/). After initially building a completely text based version of the gui loosely based on Dennis's project, I figured I could take it up a notch by creating something that scales much better with larger datasets that could be used for years at a time. 
+For a very long time now, I had this desire to set up a honeypot and use it to create a blacklist that my firewall could use to block attackers and generate lists of usernames and passwords used to log in. After digging around a bit I found a fantastic tool called Heralding that seemed to check the most boxes for me. The article I came across was a walk-through by Dennis Puerto (https://www.linkedin.com/pulse/honeypot-generating-blacklists-cisco-firepower-dennis-perto/). After initially building a completely text based version of the gui loosely based on Dennis's project, I figured I could take it up a notch by creating something that scales much better with larger datasets that could be used for years at a time. 
 
-Heralding-Frontend is a database driven self contained ASP.Net Core web frontend for a stock install of the Heralding honeypot. The intent of this application is to provide a free searchable GUI for reporting Heralding traffic by moving the honeypot connection data to a database for processing. By using MySQL as a free backend data storage platform, it's now possible to creat blacklists for firewall ingestion, password lists, or generate username lists to compare against AD users. 
+Heralding-Frontend is a database driven self contained ASP.Net Core web frontend for a stock install of the Heralding honeypot. The intent of this application is to provide a free searchable GUI for reporting Heralding traffic by moving the honeypot connection data to a database for processing. By using MySQL as a free backend data storage platform, it's now possible to create blacklists for firewall ingestion, password lists, or generate username lists to compare against AD users. 
 
 ### Environment:
 The honeypot & frontend seem to run perfectly well on a guest vm with 2gb of ram with 2 processors and 20Gb of storage space all on an optiplex 7010 (host: Windows 10 20h2 i7 3.4ghz, 8gb ram, 250gb ssd from 2014) running Ubuntu 20.04 fully patched. The vm also has a single NIC with multiple public IP's which provides for a larger attack surface with more flexibility. While the system is quite responsive, you may need to add more resources depending on your setup or how long you plan on running the honeypot. In an effort to avoid performance related issues or space constraints, I recommend 4gb with 4 processors and 40gb of space on an ssd. 
 
-In the following setup instructions, the frontend application resides in the Heralding directory in a folder called "frontend" for simplicity while scripts reside in a folder called "frontend-services". On my dev lab, I have Heralding installed to the users home directory, but can be physically exist anywhere as long as the scheduled jobs, services, and scripts are modified to point to the right location. 
+In the following setup instructions, the frontend application resides in the Heralding directory in a folder called "frontend" for simplicity while scripts reside in a folder called "frontend-services". On my dev lab, I have Heralding installed to the users' home directory, but can be physically exist anywhere as long as the scheduled jobs, services, and scripts are modified to point to the right location. 
 
 ### Installing Heralding-Frontend:
 The following instructions, generally speaking, walk through the order of installation of ASP.Net Core, MySQL, configuring services, as well as adding the scheduled jobs. All in 7 (or 8) easy steps!!!
 
 **1.** This application assumes Heralding is already installed and collecting logs into the session & auth .csv's. If not, please visit: https://github.com/johnnykv/heralding/blob/master/INSTALL.md
 
-**Note: Don't forget to configure the firewall (use what ever firewall you are confortable with) for any ports you want to monitor. In addition, you'll need to open a port for internal private access to the website, like 8181 in the example below. Do not open this port to the outside world!!!!**
+**Note: Don't forget to configure the firewall (use what ever firewall you are comfortable with) for any ports you want to monitor. In addition, you'll need to open a port for internal private access to the website, like 8181 in the example below. Do not open this port to the outside world!!!!**
   
 **2.** At this point you can move the application in to {Heralding install directory}/frontend and the .sh scripts to {heralding install directory}/frontend-services/
      
@@ -64,7 +64,7 @@ The following instructions, generally speaking, walk through the order of instal
 **5.** This application uses MySQL 8.0.21 as a backend to store Heralding logs. We'll need to install MySQL, add a user called 'honeypot', create the database called 'heralding', and then give file permissions to the new user. An easy tutorial to follow for installing is here: https://www.digitalocean.com/community/tutorials/how-to-install-mysql-on-ubuntu-20-04
 
   **Note: Please remember to change the MySQL port if Heralding is configured to monitor for MySQL logins on port 3307. 
-          In the following example, MySQL is configured to use port 3307.**
+          In the following example, MySQL is configured to use port 3307 because I'm monitoring 3306 with heralding already.**
           
    /etc/mysql/mysql.conf.d/mysqld.cnf:
 >      [mysqld]
