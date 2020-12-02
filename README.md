@@ -1,27 +1,29 @@
 # Heralding-Frontend
 ### Disclaimer: 
-A certain amount of knowledge and technical expertise is expected in networking, linux, and mysql, and as such support in those areas on my part will be limited. The project goal is to get the Frontend out to the public to try out. The instructions below include example configurations and should be used at your own risk.
+A certain amount of knowledge and technical expertise is expected in networking, linux, and mysql. As such support in those areas on my part will be limited. The project goal is to get the Frontend out to the public to try out. The instructions below include example configurations and should be used at your own risk.
 
 ### About Heralding-Frontend:
-For a very long time now, I had this desire to set up a honeypot and use it to create a blacklist that my firewall could use to block potential attackers. After digging around a bit I found Heralding, and then later a very useful tutorial by Dennis Puerto that got me going in the right direction. After initially building a completely text based version of the gui (loosely based on Dennis's project here: https://www.linkedin.com/pulse/honeypot-generating-blacklists-cisco-firepower-dennis-perto/), I figured I could take it up a notch by creating something that scales much better with larger datasets that could be used for years at a time. 
+For a very long time now, I had this desire to set up a honeypot and use it to create a blacklist that my firewall could use to block attackers and generate lists of usernames and passwords used to log in. After digging around a bit I found a fantastic tool called Heralding that seemed to check the most boxes for me. The article I came accross was a walk-through by Dennis Puerto (https://www.linkedin.com/pulse/honeypot-generating-blacklists-cisco-firepower-dennis-perto/). After initially building a completely text based version of the gui loosely based on Dennis's project, I figured I could take it up a notch by creating something that scales much better with larger datasets that could be used for years at a time. 
 
-Heralding-Frontend is a database driven self contained ASP.Net Core web frontend for a stock install of the Heralding honeypot. The intent of this application is to provide a free searchable GUI for reporting Heralding traffic by moving the honeypot connection data to a database for processing. Using MySQL as a free backend data storage platform, new features become available like creating blacklists for firewall ingestion, password lists, or generate username lists to compare against your AD users. 
+Heralding-Frontend is a database driven self contained ASP.Net Core web frontend for a stock install of the Heralding honeypot. The intent of this application is to provide a free searchable GUI for reporting Heralding traffic by moving the honeypot connection data to a database for processing. By using MySQL as a free backend data storage platform, it's now possible to creat blacklists for firewall ingestion, password lists, or generate username lists to compare against AD users. 
 
 ### Environment:
-The honeypot & frontend seem to run perfectly well on a guest vm with 2gb of ram with 2 processors and 20Gb of storage space all on an optiplex 7010 (host: Windows 10 20h2 i7 3.4ghz, 8gb ram, 250gb ssd from 2014) running Ubuntu 20.04 fully patched. The honeypot also has a single NIC with multiple public IP's which provides for a larger attack surface with more flexibility. While the system is quite responsive, you may need to add more ram depending on your setup and so I recommend 4gb with 4 processors and an ssd. In the following setup instructions, the frontend application resides in the Heralding directory in a folder called "frontend" for simplicity. On my dev lab, I have Heralding installed to the users home directory, but can be physically exist anywhere as long as the scheduled tasks, services, and scripts all point to the right location. 
+The honeypot & frontend seem to run perfectly well on a guest vm with 2gb of ram with 2 processors and 20Gb of storage space all on an optiplex 7010 (host: Windows 10 20h2 i7 3.4ghz, 8gb ram, 250gb ssd from 2014) running Ubuntu 20.04 fully patched. The vm also has a single NIC with multiple public IP's which provides for a larger attack surface with more flexibility. While the system is quite responsive, you may need to add more ram depending on your setup and so, in an effort to avoid performance related issues, I recommend 4gb with 4 processors and 40gb of space on an ssd. 
+
+In the following setup instructions, the frontend application resides in the Heralding directory in a folder called "frontend" for simplicity. On my dev lab, I have Heralding installed to the users home directory, but can be physically exist anywhere as long as the scheduled jobs, services, and scripts are modified to point to the right location. 
 
 ### Installing Heralding-Frontend:
-The following instructions, generally speaking, walk through installation of ASP.Net Core, MySQL, configuring services, and scheduled jobs in 7 or 8 easy steps. In addition to creating the service for the frontend, it works best if Heralding itself also starts as a service. 
+The following instructions, generally speaking, walk through the order of installation of ASP.Net Core, MySQL, configuring services, as well as adding the scheduled jobs. All in 7 (or 8) easy steps!!!
 
 1. This application assumes Heralding is already installed and collecting logs into the session & auth .csv's. If not, please visit: https://github.com/johnnykv/heralding/blob/master/INSTALL.md
 
 **Note: Don't forget to configure the firewall (use what ever firewall you are confortable with) for any ports you want to monitor. In addition, you'll need to open a port for internal private access to the website, like 8181 in the example below. Do not open this port to the outside world!!!!**
   
-2. At this point you can move the application in to {Heralding install directory}/frontend and the .sh scripts to {heralding install directory}/frontend-services/.**
+2. At this point you can move the application in to {Heralding install directory}/frontend and the .sh scripts to {heralding install directory}/frontend-services/
      
 3. ASP.Net Core 3.1 (support for 5.0 will be made available as soon as Pomelo comes out of Alpha). To install, please visit: https://docs.microsoft.com/en-us/dotnet/core/install/linux-ubuntu
    
-   -Test to make sure the honeypot is available at http://127.0.0.1:5000 before moving on.
+   -Test to make sure the kestrel server is available at http://127.0.0.1:5000 before moving on.
    
 4. Install and configure Apache2 reverse proxy: https://www.c-sharpcorner.com/article/how-to-deploy-net-core-application-on-linux/
 
@@ -73,15 +75,17 @@ The following instructions, generally speaking, walk through installation of ASP
 >      general_log_file	= /var/log/mysql/mysql-General.log
 >      general_log		= 1
 
-6. 2 jobs should be configured to run the two scripts to both move data in to sql and also move exported MySQL data to the public website. The following example runs those processes every 5 minutes but they can be changed as necessary.
+6. 2 jobs should be configured to run the two scripts to both move data in to sql and also move exported MySQL data to the public website. If you are adding the front-end to an existing honeypot with logs already collected, please copy them out as they will be purged after they are dumped into the database. The following example runs those processes every 5 minutes but they can be changed as necessary.
 
+   **Note: mv_to_mysql.sh uses the encrypted login-path called "mypath" instead of hard coding the login information: https://dev.mysql.com/doc/refman/5.6/en/option-file-options.html - test logging in via command line with the login-path prior to scheduling the jobs**
+   
 >   sudo crontab -e:
 
 >      */5 * * * * sh {heralding install directory}/frontend-services/mv_to_mysql.sh >> /var/log/heralding-mysql.log
 
 >      */5 * * * * sh {heralding install directory}/frontend-services/update.sh >> /var/log/heralding-update.log
     
-   **Note: mv_to_mysql.sh uses the encrypted login-path called "mypath" instead of hard coding the login information: https://dev.mysql.com/doc/refman/5.6/en/option-file-options.html**
+
    **Important Note: Each script is configured using variables at the top of each script indicating where the directory Heralding is installed. It must be changed to match your configuration.**
 
 7. Copy the Heralding Frontend code to {heralding install directory}/frontend and in the appsettings.json file, change the HoneypotDBConnection port number, username, and password. Now you are ready to test the site.
@@ -103,4 +107,4 @@ The following instructions, generally speaking, walk through installation of ASP
 > CREATE EVENT make_14_day_username_list ON SCHEDULE EVERY 5 MINUTE STARTS CURRENT_TIMESTAMP DO Select distinct username from authentications where timestamp between subdate(curdate(), 14) and curdate() order by username INTO OUTFILE '/var/lib/mysql-files/14-day-username-list.txt' LINES TERMINATED BY '\r\n';
     
 
-At this point, after the server has been running for 5 minutes, you should have new blacklists available at http://127.0.0.1:8181/Public/blacklist.txt. Be sure to add IP addresses to your whitelist if your firewall is configured to block ip addresses in the new blacklist file.
+At this point, after the server has been running for 5 minutes, you should have new blacklists available at http://127.0.0.1:8181/Public/blacklist.txt. Be sure to add IP addresses to your whitelist if your firewall is configured to block ip addresses in the new blacklist file. Anyone that tries to establish a connection on an open port (other than 8181) will be added to this new blacklist text file.
