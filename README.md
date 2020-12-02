@@ -26,7 +26,7 @@ The following instructions, generally speaking, walk through the order of instal
    
    -Test to make sure the kestrel server is available at http://127.0.0.1:5000 before moving on.
    
-**4.** Install and configure Apache2 reverse proxy: https://www.c-sharpcorner.com/article/how-to-deploy-net-core-application-on-linux/ and create a new user called "honeypot" to access the database named "heralding" that will be created later.
+**4.** Install and configure Apache2 reverse proxy: https://www.c-sharpcorner.com/article/how-to-deploy-net-core-application-on-linux/
 
 **Note: The port apache listens on cannot be one already in use or monitored by heralding. Make sure to change the listening port and add a .conf file to your conf-enabled folder. In the following example, Apache is configured to listen on port 8181 and forward traffic to the internal Kestrel server that dotnet uses.**
 
@@ -61,7 +61,7 @@ The following instructions, generally speaking, walk through the order of instal
 >      sudo systemctl enable heralding-frontend
 >      sudo systemctl start heralding-frontend
    
-**5.** This application uses MySQL 8.0.21 as a backend to store Heralding logs. We'll need to install MySQL, add a user called 'honeypot', create the database, and then give file permissions to the new user. An easy tutorial to follow for installing is here: https://www.digitalocean.com/community/tutorials/how-to-install-mysql-on-ubuntu-20-04
+**5.** This application uses MySQL 8.0.21 as a backend to store Heralding logs. We'll need to install MySQL, add a user called 'honeypot', create the database called 'heralding', and then give file permissions to the new user. An easy tutorial to follow for installing is here: https://www.digitalocean.com/community/tutorials/how-to-install-mysql-on-ubuntu-20-04
 
   **Note: Please remember to change the MySQL port if Heralding is configured to monitor for MySQL logins on port 3307. 
           In the following example, MySQL is configured to use port 3307.**
