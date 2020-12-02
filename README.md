@@ -69,10 +69,10 @@ The following instructions, generally speaking, walk through the order of instal
    mysqld.cnf:
 >      [mysqld]
 >      ...
->      port		= 3307 #(or anything you want that isn't already in use or being monitored)
->      local_infile	= 1 # Required for moving data into MySQL
->      bind-address		= 0.0.0.0
->      secure_file_priv	= ''
+>      port		= 3307  # (or anything you want that isn't already in use or being monitored)
+>      local_infile	= 1  # Required for moving data into MySQL
+>      bind-address		= 0.0.0.0  # Required
+>      secure_file_priv	= ''  # Required
 >      general_log_file	= /var/log/mysql/mysql-General.log
 >      general_log		= 1
 
@@ -127,11 +127,11 @@ If everything is working as designed, go ahead and schedule a time for the scrip
 
 > CREATE EVENT make_whitelist ON SCHEDULE EVERY 5 MINUTE STARTS CURRENT_TIMESTAMP DO Select distinct ip_addr from whitelist INTO OUTFILE '/var/lib/mysql-files/whitelist.txt' LINES TERMINATED BY '\r\n';
 
-> CREATE EVENT make_password_list ON SCHEDULE EVERY 5 MINUTE STARTS CURRENT_TIMESTAMP DO Select distinct password from authentications order by password INTO OUTFILE '/var/lib/mysql-files/passwordlist.txt' LINES TERMINATED BY '\r\n';
+> CREATE EVENT make_password_list ON SCHEDULE EVERY 30 MINUTE STARTS CURRENT_TIMESTAMP DO Select distinct password from authentications order by password INTO OUTFILE '/var/lib/mysql-files/passwordlist.txt' LINES TERMINATED BY '\r\n';
 
-> CREATE EVENT make_username_list ON SCHEDULE EVERY 5 MINUTE STARTS CURRENT_TIMESTAMP DO Select distinct username from authentications order by username INTO OUTFILE '/var/lib/mysql-files/usernamelist.txt' LINES TERMINATED BY '\r\n';
+> CREATE EVENT make_username_list ON SCHEDULE EVERY 30 MINUTE STARTS CURRENT_TIMESTAMP DO Select distinct username from authentications order by username INTO OUTFILE '/var/lib/mysql-files/usernamelist.txt' LINES TERMINATED BY '\r\n';
 
-> CREATE EVENT make_14_day_username_list ON SCHEDULE EVERY 5 MINUTE STARTS CURRENT_TIMESTAMP DO Select distinct username from authentications where timestamp between subdate(curdate(), 14) and curdate() order by username INTO OUTFILE '/var/lib/mysql-files/14-day-username-list.txt' LINES TERMINATED BY '\r\n';
+> CREATE EVENT make_14_day_username_list ON SCHEDULE EVERY 30 MINUTE STARTS CURRENT_TIMESTAMP DO Select distinct username from authentications where timestamp between subdate(curdate(), 14) and curdate() order by username INTO OUTFILE '/var/lib/mysql-files/14-day-username-list.txt' LINES TERMINATED BY '\r\n';
     
 
-At this point, after the server has been running for 5 minutes, you should have new blacklists available at http://127.0.0.1:8181/Public/blacklist.txt. Be sure to add IP addresses to your whitelist if your firewall is configured to block ip addresses in the new blacklist file. Anyone that tries to establish a connection on an open port (other than 8181) will be added to this new blacklist text file.
+At this point, after the server has been running for 5 minutes, you should have new blacklists available at http://127.0.0.1:8181/Public/blacklist.txt. Be sure to add IP addresses to your whitelist if your edge firewall is configured to block ip addresses with the new blacklist file. If your edge firewall is using the new blacklist, anyone that tries to establish a connection on an open port (other than 8181) will be added to this new blacklist text file after no more than 5 minutes.
