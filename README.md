@@ -15,18 +15,18 @@ In the following setup instructions, the frontend application resides in the Her
 ### Installing Heralding-Frontend:
 The following instructions, generally speaking, walk through the order of installation of ASP.Net Core, MySQL, configuring services, as well as adding the scheduled jobs. All in 7 (or 8) easy steps!!!
 
-1. This application assumes Heralding is already installed and collecting logs into the session & auth .csv's. If not, please visit: https://github.com/johnnykv/heralding/blob/master/INSTALL.md
+**1.** This application assumes Heralding is already installed and collecting logs into the session & auth .csv's. If not, please visit: https://github.com/johnnykv/heralding/blob/master/INSTALL.md
 
 **Note: Don't forget to configure the firewall (use what ever firewall you are confortable with) for any ports you want to monitor. In addition, you'll need to open a port for internal private access to the website, like 8181 in the example below. Do not open this port to the outside world!!!!**
   
-2. At this point you can move the application in to {Heralding install directory}/frontend and the .sh scripts to {heralding install directory}/frontend-services/
+**2.** At this point you can move the application in to {Heralding install directory}/frontend and the .sh scripts to {heralding install directory}/frontend-services/
      
-3. ASP.Net Core 3.1 (support for 5.0 will be made available as soon as Pomelo comes out of Alpha). To install, please visit: https://docs.microsoft.com/en-us/dotnet/core/install/linux-ubuntu
+**3.** ASP.Net Core 3.1 (support for 5.0 will be made available as soon as Pomelo comes out of Alpha). To install, please visit: https://docs.microsoft.com/en-us/dotnet/core/install/linux-ubuntu
 
    
    -Test to make sure the kestrel server is available at http://127.0.0.1:5000 before moving on.
    
-4. Install and configure Apache2 reverse proxy: https://www.c-sharpcorner.com/article/how-to-deploy-net-core-application-on-linux/
+**4.** Install and configure Apache2 reverse proxy: https://www.c-sharpcorner.com/article/how-to-deploy-net-core-application-on-linux/ and create a new user called "honeypot" to access the database named "heralding" that will be created later.
 
 **Note: The port apache listens on cannot be one already in use or monitored by heralding. Make sure to change the listening port and add a .conf file to your conf-enabled folder. In the following example, Apache is configured to listen on port 8181 and forward traffic to the internal Kestrel server that dotnet uses.**
 
@@ -61,7 +61,7 @@ The following instructions, generally speaking, walk through the order of instal
 >      sudo systemctl enable heralding-frontend
 >      sudo systemctl start heralding-frontend
    
-5. This application uses MySQL 8.0.21 as a backend to store Heralding logs. An easy tutorial to follow for installing is here: https://www.digitalocean.com/community/tutorials/how-to-install-mysql-on-ubuntu-20-04
+**5.** This application uses MySQL 8.0.21 as a backend to store Heralding logs. We'll need to install MySQL, add a user called 'honeypot', create the database, and then give file permissions to the new user. An easy tutorial to follow for installing is here: https://www.digitalocean.com/community/tutorials/how-to-install-mysql-on-ubuntu-20-04
 
   **Note: Please remember to change the MySQL port if Heralding is configured to monitor for MySQL logins on port 3307. 
           In the following example, MySQL is configured to use port 3307.**
@@ -76,12 +76,35 @@ The following instructions, generally speaking, walk through the order of instal
 >      general_log_file	= /var/log/mysql/mysql-General.log
 >      general_log		= 1
 
-   **Note: mv_to_mysql.sh uses the encrypted login-path called "mypath" instead of hard coding the login information: https://dev.mysql.com/doc/refman/5.6/en/option-file-options.html - - Test your sql configuration with the following command prior to scheduling the jobs in step 6.**
+-- Create the database and tables in workbench by running CreateDatabase.sql located in {heralding install directory}/frontend-services/ or by running the following:
+
+>     mysql> source {heralding install directory}/frontend-services/CreateDatabase.sql
+
+   **Note: mv_to_mysql.sh uses the encrypted login-path called "mypath" instead of hard coding the login information: https://dev.mysql.com/doc/refman/5.6/en/option-file-options.html - Test your sql configuration with the following command prior to scheduling the jobs in step 6.**
   
 >      mysql --login-path=mypath heralding -bse "select count(*) from sessions"  
-  
-6. 2 jobs should be configured to run the two scripts to both move data in to sql and also move exported MySQL data to the public website. If you are adding the front-end to an existing honeypot with logs already collected, please copy them out to keep as a backup in case something goes wrong. The following example runs those processes every 5 minutes but they can be changed as necessary.
 
+Before moving on to step 6, you'll need to add permissions to the user you created in the steps above:
+
+>     GRANT FILE ON heralding.* TO 'heralding'@'localhost';
+
+or, if you prefer: 
+
+>     GRANT FILE ON heralding.* TO 'heralding'@'%';
+
+You may need to flush your permissions afterwards:
+
+>     FLUSH PRIVILEGES;
+
+  
+**6.** 2 jobs should be configured to run the two scripts to both move data in to sql and also move exported MySQL data to the public website. If you are adding the front-end to an existing honeypot with logs already collected, please copy the log_auth.csv and log_session.csv out to keep as a backup in case something goes wrong. Be aware that every time the script runs the log_auth and log_session data files will be emptied out and every 5 minutes the current log is backed up to {heralding install directory}/frontend-services/temp/. The following example runs those processes every 5 minutes but they can be changed as necessary.
+
+-- Do a test run of in a terminal to verify all permissions are correct before scheduling jobs.
+
+>     sudo sh {heralding install directory}/frontend-services/mv_to_mysql.sh
+
+
+If everything is working as designed, go ahead and schedule a time for the scripts to push. 
    
 >   sudo crontab -e:
 
@@ -92,9 +115,9 @@ The following instructions, generally speaking, walk through the order of instal
 
    **Important Note: Each script is configured using variables at the top of each script indicating where the directory Heralding is installed. It must be changed to match your configuration.**
 
-7. Copy the Heralding Frontend code to {heralding install directory}/frontend (if you didn't already do it in step 2) and in the appsettings.json file, change the HoneypotDBConnection port number, username, and password. Now you are ready to test the site by navigating to http://127.0.0.1:8181.
+**7.** Copy the Heralding Frontend code to {heralding install directory}/frontend (if you didn't already do it in step 2) and in the appsettings.json file, change the HoneypotDBConnection port number, username, and password. Now you are ready to test the site by navigating to http://127.0.0.1:8181.
 
-8. Optionally, create scheduled tasks in MySQL to export data as needed so the heralding-update service (in step 5) cam move the files out to the public folder. If workbench is installed, just copy and paste the following and execute:
+**8.** Optionally, create scheduled tasks in MySQL to export data as needed so the heralding-update service (in step 5) cam move the files out to the public folder. If workbench is installed, just copy and paste the following and execute:
 
 > CREATE EVENT make_30_day_blacklist ON SCHEDULE EVERY 5 MINUTE STARTS CURRENT_TIMESTAMP DO Select distinct source_ip from sessions left join whitelist on source_ip = ip_addr where ip_addr is null and timestamp between subdate(curdate(), 30)and curdate()  INTO OUTFILE '/var/lib/mysql-files/30-day-blacklist.txt' LINES TERMINATED BY '\r\n';
 
