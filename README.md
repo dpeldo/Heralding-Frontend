@@ -22,6 +22,7 @@ The following instructions, generally speaking, walk through the order of instal
 2. At this point you can move the application in to {Heralding install directory}/frontend and the .sh scripts to {heralding install directory}/frontend-services/
      
 3. ASP.Net Core 3.1 (support for 5.0 will be made available as soon as Pomelo comes out of Alpha). To install, please visit: https://docs.microsoft.com/en-us/dotnet/core/install/linux-ubuntu
+
    
    -Test to make sure the kestrel server is available at http://127.0.0.1:5000 before moving on.
    
@@ -75,9 +76,12 @@ The following instructions, generally speaking, walk through the order of instal
 >      general_log_file	= /var/log/mysql/mysql-General.log
 >      general_log		= 1
 
+   **Note: mv_to_mysql.sh uses the encrypted login-path called "mypath" instead of hard coding the login information: https://dev.mysql.com/doc/refman/5.6/en/option-file-options.html - - Test your sql configuration with the following command prior to scheduling the jobs in step 6.**
+  
+>      mysql --login-path=mypath heralding -bse "select count(*) from sessions"  
+  
 6. 2 jobs should be configured to run the two scripts to both move data in to sql and also move exported MySQL data to the public website. If you are adding the front-end to an existing honeypot with logs already collected, please copy them out to keep as a backup in case something goes wrong. The following example runs those processes every 5 minutes but they can be changed as necessary.
 
-   **Note: mv_to_mysql.sh uses the encrypted login-path called "mypath" instead of hard coding the login information: https://dev.mysql.com/doc/refman/5.6/en/option-file-options.html - test logging in via command line with the login-path prior to scheduling the jobs**
    
 >   sudo crontab -e:
 
@@ -88,7 +92,7 @@ The following instructions, generally speaking, walk through the order of instal
 
    **Important Note: Each script is configured using variables at the top of each script indicating where the directory Heralding is installed. It must be changed to match your configuration.**
 
-7. Copy the Heralding Frontend code to {heralding install directory}/frontend and in the appsettings.json file, change the HoneypotDBConnection port number, username, and password. Now you are ready to test the site.
+7. Copy the Heralding Frontend code to {heralding install directory}/frontend (if you didn't already do it in step 2) and in the appsettings.json file, change the HoneypotDBConnection port number, username, and password. Now you are ready to test the site by navigating to http://127.0.0.1:8181.
 
 8. Optionally, create scheduled tasks in MySQL to export data as needed so the heralding-update service (in step 5) cam move the files out to the public folder. If workbench is installed, just copy and paste the following and execute:
 
