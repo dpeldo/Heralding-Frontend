@@ -75,7 +75,7 @@ The following instructions, generally speaking, walk through the order of instal
 >      general_log_file	= /var/log/mysql/mysql-General.log
 >      general_log		= 1
 
-6. 2 jobs should be configured to run the two scripts to both move data in to sql and also move exported MySQL data to the public website. If you are adding the front-end to an existing honeypot with logs already collected, please copy them out as they will be purged after they are dumped into the database. The following example runs those processes every 5 minutes but they can be changed as necessary.
+6. 2 jobs should be configured to run the two scripts to both move data in to sql and also move exported MySQL data to the public website. If you are adding the front-end to an existing honeypot with logs already collected, please copy them out to keep as a backup in case something goes wrong. The following example runs those processes every 5 minutes but they can be changed as necessary.
 
    **Note: mv_to_mysql.sh uses the encrypted login-path called "mypath" instead of hard coding the login information: https://dev.mysql.com/doc/refman/5.6/en/option-file-options.html - test logging in via command line with the login-path prior to scheduling the jobs**
    
