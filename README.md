@@ -8,20 +8,20 @@ For a very long time now, I've had this desire to set up a honeypot and use it t
 Heralding-Frontend is a database driven self contained ASP.Net Core web frontend for a stock install of the Heralding honeypot. The intent of this application is to provide a free searchable GUI for reporting Heralding traffic by moving the honeypot connection data to a database for processing. By using MySQL as a free backend data storage platform, it's now possible to create blacklists for firewall ingestion, password lists, or generate username lists to compare against AD users. 
 
 ### Environment:
-The honeypot & frontend seem to run perfectly well on a guest vm with 2gb of ram with 2 processors and 20Gb of storage space all on an optiplex 7010 (host: Windows 10 20h2 i7 3.4ghz, 8gb ram, 250gb ssd from 2014) running Ubuntu 20.04 fully patched. The vm also has a single NIC with multiple public IP's which provides for a larger attack surface with more flexibility. While the system is quite responsive, you may need to add more resources depending on your setup or how long you plan on running the honeypot. In an effort to avoid performance related issues or space constraints, I recommend 4gb with 4 processors and 40gb of space on an ssd. 
+The honeypot & frontend seem to run perfectly well on a guest vm with 2gb of ram with 2 processors and 20Gb of storage space all on an optiplex 7010 (host: Windows 10 20h2 i7 3.4ghz, 8gb ram, 250gb ssd from 2014) running Ubuntu 21.04 fully patched. The vm also has a single NIC with multiple public IP's which provides for a larger attack surface with more flexibility. While the system is quite responsive, you may need to add more resources depending on your setup or how long you plan on running the honeypot. In an effort to avoid performance related issues or space constraints, I recommend 4gb with 4 processors and 40gb of space on an ssd. 
 
-In the following setup instructions, the frontend application resides in the Heralding directory in a folder called "frontend" for simplicity while scripts reside in a folder called "frontend-services". On my dev lab, I have Heralding installed to the users' home directory, but can be physically exist anywhere as long as the scheduled jobs, services, and scripts are modified to point to the right location. 
+In the following setup examples, the frontend application resides in the /opt/honeypot/frontend for simplicity while scripts reside in a folder called /opt/honeypot/frontend-services. In my environment, I have Heralding installed at /opt/honeypot/heralding, but it can physically exist anywhere as long as the scheduled jobs, services, and scripts are modified to point to the right location. 
 
 ### Installing Heralding-Frontend:
-The following instructions, generally speaking, walk through the order of installation of ASP.Net Core, MySQL, configuring services, as well as adding the scheduled jobs. All in 7 (or 8) easy steps. If you feel you can install and configure SQL, Apache, and ASP.Net or already have them installed then steps 2 and 6/7/8 are the only relevant steps.
+The following instructions, generally speaking, walk through the order of installation of ASP.Net Core, MySQL, configuring services, as well as adding the scheduled jobs. All in 8-ish easy steps. If you feel you can install and configure SQL, Apache, and ASP.Net or already have them installed then steps 2 and 6/7/8 are the only relevant steps.
 
 **1.** This application assumes Heralding is already installed and collecting logs into the session & auth .csv's. If not, please visit: https://github.com/johnnykv/heralding/blob/master/INSTALL.md
 
 **Note: Don't forget to configure the local firewall (use what ever firewall you are comfortable with) for any ports you want to monitor. In addition, you'll need to open a port for internal private access to the website, like 8181 in the example below. Do not open this port to the outside world!!!!**
   
-**2.** At this point you can move the application in to {Heralding install directory}/frontend and the .sh scripts to {heralding install directory}/frontend-services/
+**2.** At this point you can move the application in to {install directory}/frontend and the .sh scripts to {install directory}/frontend-services/
      
-**3.** ASP.Net Core 3.1 (support for 5.0 will be made available as soon as Pomelo comes out of Alpha). To install, please visit: https://docs.microsoft.com/en-us/dotnet/core/install/linux-ubuntu
+**3.** ASP.Net Core 5.0 on Ubuntu 21.04. To install, please visit: https://docs.microsoft.com/en-us/dotnet/core/install/linux-ubuntu
 
    
    -Test to make sure the kestrel server is available at http://127.0.0.1:5000 before moving on.
@@ -48,8 +48,8 @@ The following instructions, generally speaking, walk through the order of instal
 >      [Unit]
 >      Description=Heralding Frontend (DotNet 3.1)
 >      [Service]
->      WorkingDirectory=#{Heralding install directory}/frontend
->      ExecStart=/usr/bin/dotnet #{Heralding install directory}/frontend/HeraldingFrontend.dll
+>      WorkingDirectory=#{install directory}/frontend
+>      ExecStart=/usr/bin/dotnet #{install directory}/frontend/HeraldingFrontend.dll
 >      Restart=always
 >      RestartSec=10
 >      SyslogIdentifier=netcore-demo
@@ -76,9 +76,9 @@ The following instructions, generally speaking, walk through the order of instal
 >      general_log_file	= /var/log/mysql/mysql-General.log
 >      general_log		= 1
 
--- Create the database and tables in workbench by running CreateDatabase.sql located in {heralding install directory}/frontend-services/ or by running the following:
+-- Create the database and tables in workbench by running CreateDatabase.sql located in {install directory}/frontend-services/ or by running the following:
 
->     mysql> source {heralding install directory}/frontend-services/CreateDatabase.sql
+>     mysql> source {install directory}/frontend-services/CreateDatabase.sql
 
    **Note: mv_to_mysql.sh uses the encrypted login-path called "mypath" instead of hard coding the login information: https://dev.mysql.com/doc/refman/5.6/en/option-file-options.html - Test your sql configuration with the following command prior to scheduling the jobs in step 6.**
   
@@ -101,21 +101,21 @@ You may need to flush your permissions afterwards:
 
 -- Do a test run of in a terminal to verify all permissions are correct before scheduling jobs.
 
->     sudo sh {heralding install directory}/frontend-services/mv_to_mysql.sh
+>     sudo sh {install directory}/frontend-services/mv_to_mysql.sh
 
 
 If everything is working as designed, go ahead and schedule a time for the scripts to push. 
    
 >   sudo crontab -e:
 
->      */5 * * * * sh {heralding install directory}/frontend-services/mv_to_mysql.sh >> /var/log/heralding-mysql.log
+>      */5 * * * * sh {install directory}/frontend-services/mv_to_mysql.sh >> /var/log/heralding-mysql.log
 
->      */5 * * * * sh {heralding install directory}/frontend-services/update.sh >> /var/log/heralding-update.log
+>      */5 * * * * sh {install directory}/frontend-services/update.sh >> /var/log/heralding-update.log
     
 
    **Important Note: Each script is configured using variables at the top of each script indicating where the directory Heralding is installed. It must be changed to match your configuration.**
 
-**7.** Copy the Heralding Frontend code to {heralding install directory}/frontend (if you didn't already do it in step 2) and in the appsettings.json file, change the HoneypotDBConnection port number, username, and password. Now you are ready to test the site by navigating to http://127.0.0.1:8181.
+**7.** Copy the Heralding Frontend code to {install directory}/frontend (if you didn't already do it in step 2) and in the appsettings.json file, change the HoneypotDBConnection port number, username, and password. Now you are ready to test the site by navigating to http://127.0.0.1:8181.
 
 **8.** Optionally, create scheduled tasks in MySQL to export data as needed so the heralding-update service (in step 5) cam move the files out to the public folder. If workbench is installed, just copy and paste the following and execute:
 
